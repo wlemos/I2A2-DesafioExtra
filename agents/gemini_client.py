@@ -1,10 +1,10 @@
+import os
 import streamlit as st
 from google import genai
 
-client = genai.Client()
+os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
 
-GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
-genai.configure(api_key=GEMINI_API_KEY)
+client = genai.Client()
 
 def chamar_gemini(pergunta: str, resumo_dataset: str) -> str:
     prompt = (
