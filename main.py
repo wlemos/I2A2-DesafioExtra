@@ -1,9 +1,10 @@
+import os
 import streamlit as st
 from agents.orchestrator import OrchestratorAgent
 
-GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
-SUPABASE_URL = st.secrets["SUPABASE_URL"]
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+os.environ["SUPABASE_URL"] = st.secrets["SUPABASE_URL"]
+os.environ["SUPABASE_KEY"] = st.secrets["SUPABASE_KEY"]
 
 def precisa_grafico(pergunta: str) -> bool:
     termos_grafico = ['gráfico', 'grafico', 'plot', 'visualização', 'visualizacao', 'mostrar', 'exibir', 'desenhar']
