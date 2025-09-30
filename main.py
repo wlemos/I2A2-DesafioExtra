@@ -19,9 +19,9 @@ st.markdown("Faça perguntas livres sobre o CSV e veja respostas analíticas e v
 
 uploaded_file = st.file_uploader('Carregue seu arquivo CSV')
 
-user_input = st.text_input("""Sua pergunta: \n
-                           obs: para visualizar gráficoa adionar os termos a seguir na sua pergunta \n
-                        ['gráfico', 'grafico', 'plot', 'visualização', 'visualizacao', 'mostrar', 'exibir', 'desenhar']""")
+user_input = st.text_input("""obs: para gráficos add ['gráfico', 'grafico', 'plot', 'visualização', 'visualizacao', 'mostrar', 'exibir', 'desenhar'] na sua pergunta\n
+
+Sua pergunta: """)
 
 if 'orchestrator' not in st.session_state:
     st.session_state['orchestrator'] = OrchestratorAgent()
