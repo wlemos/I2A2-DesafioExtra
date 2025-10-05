@@ -1,7 +1,6 @@
 import os
 import streamlit as st
 from agents.orchestrator import OrchestratorAgent
-from utils.supabase_client import supabase
 
 os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
 os.environ["SUPABASE_URL"] = st.secrets["SUPABASE_URL"]
