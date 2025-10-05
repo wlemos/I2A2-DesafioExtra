@@ -17,6 +17,10 @@ class DataLoaderAgent:
         return df, stats, dataset_id
 
     def gerar_dataset_id(self, df):
-        # Gerar hash md5 baseado em hash dos valores do dataframe
-        data_bytes = pd.util.hash_pandas_object(df, index=True).values.tobytes()
+        df_for_hash = df.copy()
+        for col in df_for_hash.columns:
+            # Converte listas em strings para evitar erro de hash
+            if df_for_hash[col].apply(lambda x: isinstance(x, list)).any():
+                df_for_hash[col] = df_for_hash[col].astype(str)
+        data_bytes = pd.util.hash_pandas_object(df_for_hash, index=True).values.tobytes()
         return hashlib.md5(data_bytes).hexdigest()
