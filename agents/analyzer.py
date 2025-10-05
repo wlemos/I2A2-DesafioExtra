@@ -6,7 +6,7 @@ class AnalyzerAgent:
         if not dataset_info:
             return ""
 
-        df = dataset_info["df"]
+        df = dataset_info[0]
         resumo = []
 
         resumo.append(f"Número de linhas: {df.shape[0]}, Número de colunas: {df.shape[1]}")
