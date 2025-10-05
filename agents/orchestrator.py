@@ -48,9 +48,9 @@ class OrchestratorAgent:
             self.memory.save_context(user_input, analise, dataset_info, dataset_id)
 
         return {
-            "resumo": analise.get_resumo(),
-            "detalhes": analise.get_detalhes(),
+            "resumo": analise.get(["resumo"], ""),
+            "detalhes": analise.get("detalhes", {}),
             "graficos": graficos,
-            "conclusao": analise.get_conclusao(),
+            "conclusao": analise.get("conclusao", ""),
             "contexto_passado": contexto_historico,
         }
