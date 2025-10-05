@@ -38,7 +38,7 @@ class OrchestratorAgent:
 
     def handle_query(self, user_input, uploaded_file):
         contexto_historico = self.memory.get_conclusoes()
-        dataset_info = self.dataloader.load_uploaded_file(uploaded_file) if uploaded_file else None
+        dataset_info = self.dataloader.load(uploaded_file) if uploaded_file else None
         analise = self.analyzer.analyze(dataset_info, user_input, contexto=contexto_historico)
 
         if self.precisa_grafico(user_input):
