@@ -28,6 +28,7 @@ class MemoryAgent:
             query = query.eq("dataset_id", dataset_id)
         dados = query.execute()
         if dados.data:
-            return "\n".join(item["resposta"] for item in dados.data)
+            return "\n".join(str(item["resposta"]) for item in dados.data)
+
         else:
             return "Ainda não há análises anteriores registradas."
