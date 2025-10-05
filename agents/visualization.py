@@ -1,27 +1,52 @@
-import plotly.express as px
+import os
+import streamlit as st
+from agents.orchestrator import OrchestratorAgent
 
-class VisualizationAgent:
-    def visualize(self, analise, datasetinfo, colunas_filtradas=None):
-        """
-        Gera gráficos apenas para as colunas numéricas filtradas.
-        Se colunas_filtradas for None ou vazia, não gera gráficos.
-        """
-        if datasetinfo is None or datasetinfo[0] is None:
-            return None
+os.environ["GEMINIAPIKEY"] = st.secrets["GEMINIAPIKEY"]
+os.environ["SUPABASEURL"] = st.secrets["SUPABASEURL"]
+os.environ["SUPABASEKEY"] = st.secrets["SUPABASEKEY"]
 
-        df = datasetinfo[0]
+def precisa_grafico(pergunta: str) -> bool:
+    termos_grafico = ["grafico", "gráfico", "plot", "visualizacao", "visualização", "mostrar", "exibir", "desenhar"]
+    pergunta_lower = pergunta.lower()
+    return any(termo in pergunta_lower for termo in termos_grafico)
 
-        if not colunas_filtradas:
-            return None
+st.set_page_config(page_title="IA CSV Multi-Agente", layout="wide")
 
-        numeric_cols = df.select_dtypes(include='number').columns.tolist()
-        cols_para_graficos = [col for col in colunas_filtradas if col in numeric_cols]
+st.title("Análise Inteligente de CSV com AI Agentes")
+st.markdown("Faça perguntas livres sobre o CSV e veja respostas analíticas e visuais!")
 
-        graficos = []
-        for col in cols_para_graficos:
-            fig_hist = px.histogram(df, x=col, title=f'Histograma de {col}')
-            graficos.append(fig_hist)
-            fig_box = px.box(df, y=col, title=f'Boxplot de {col}')
-            graficos.append(fig_box)
+uploaded_file = st.file_uploader("Carregue seu arquivo CSV")
+st.write("Obs: para gráficos, adicione termos como gráfico, visualizar, plot, exibir na sua pergunta.")
 
-        return graficos
+user_input = st.text_input("Sua pergunta")
+
+if "orchestrator" not in st.session_state:
+    st.session_state.orchestrator = OrchestratorAgent()
+
+if uploaded_file and user_input:
+    resposta = st.session_state.orchestrator.handle_query(user_input, uploaded_file)
+
+    if resposta:
+        resumo = resposta.get("resumo", "")
+        detalhes = resposta.get("detalhes", "")
+        graficos = resposta.get("graficos", [])
+
+        st.subheader("Resumo")
+        st.write(resumo if resumo else "Nenhum resumo disponível.")
+
+        st.subheader("Detalhes")
+        st.write(detalhes if detalhes else "Nenhum detalhe disponível.")
+
+        if graficos:
+            st.subheader("Gráficos")
+            # Certifique-se que graficos é iterável e não None
+            for grafico in graficos:
+                st.plotly_chart(grafico)
+        else:
+            st.write("Nenhum gráfico gerado para essa consulta.")
+else:
+    if not uploaded_file:
+        st.info("Por favor, carregue um arquivo CSV para iniciar.")
+    if not user_input:
+        st.info("Por favor, digite uma pergunta para começar a análise.")
