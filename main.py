@@ -2,39 +2,51 @@ import os
 import streamlit as st
 from agents.orchestrator import OrchestratorAgent
 
-os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
-os.environ["SUPABASE_URL"] = st.secrets["SUPABASE_URL"]
-os.environ["SUPABASE_KEY"] = st.secrets["SUPABASE_KEY"]
+os.environ["GEMINIAPIKEY"] = st.secrets["GEMINIAPIKEY"]
+os.environ["SUPABASEURL"] = st.secrets["SUPABASEURL"]
+os.environ["SUPABASEKEY"] = st.secrets["SUPABASEKEY"]
 
 def precisa_grafico(pergunta: str) -> bool:
-    termos_grafico = ['gráfico', 'grafico', 'plot', 'visualização', 'visualizacao', 'mostrar', 'exibir', 'desenhar']
+    termos_grafico = ["grafico", "gráfico", "plot", "visualizacao", "visualização", "mostrar", "exibir", "desenhar"]
     pergunta_lower = pergunta.lower()
     return any(termo in pergunta_lower for termo in termos_grafico)
 
-st.set_page_config(page_title='IA CSV Multi-Agente 🚀', layout='wide')
+st.set_page_config(page_title="IA CSV Multi-Agente", layout="wide")
 
-st.title('Análise Inteligente de CSV com AI Agentes')
-
+st.title("Análise Inteligente de CSV com AI Agentes")
 st.markdown("Faça perguntas livres sobre o CSV e veja respostas analíticas e visuais!")
 
-uploaded_file = st.file_uploader('Carregue seu arquivo CSV')
+uploaded_file = st.file_uploader("Carregue seu arquivo CSV")
+st.write("Obs: para gráficos, adicione termos como gráfico, visualizar, plot, exibir na sua pergunta.")
 
-st.write("obs: para gráficos add ['gráfico', 'grafico', 'plot', 'visualização', 'visualizacao', 'mostrar', 'exibir', 'desenhar'] na sua pergunta")
+user_input = st.text_input("Sua pergunta")
 
-user_input = st.text_input("Sua pergunta: ")
-
-if 'orchestrator' not in st.session_state:
-    st.session_state['orchestrator'] = OrchestratorAgent()
+if "orchestrator" not in st.session_state:
+    st.session_state.orchestrator = OrchestratorAgent()
 
 if uploaded_file and user_input:
-    resposta = st.session_state['orchestrator'].handle_query(user_input, uploaded_file)
-    st.subheader('Resposta da IA')
-    st.write(resposta['resumo'])  
+    resposta = st.session_state.orchestrator.handle_query(user_input, uploaded_file)
 
-    if precisa_grafico(user_input):
-        st.subheader('Visualizações')
-        for fig in resposta['graficos']:
-            st.plotly_chart(fig)
-        if resposta['contexto_passado']:
-            st.subheader('Histórico/Memória')
-            st.write(resposta['contexto_passado'])        
+    if resposta:
+        resumo = resposta.get("resumo", "")
+        detalhes = resposta.get("detalhes", "")
+        graficos = resposta.get("graficos", [])
+
+        st.subheader("Resumo")
+        st.write(resumo if resumo else "Nenhum resumo disponível.")
+
+        st.subheader("Detalhes")
+        st.write(detalhes if detalhes else "Nenhum detalhe disponível.")
+
+        if graficos:
+            st.subheader("Gráficos")
+            # Certifique-se que graficos é iterável e não None
+            for grafico in graficos:
+                st.plotly_chart(grafico)
+        else:
+            st.write("Nenhum gráfico gerado para essa consulta.")
+else:
+    if not uploaded_file:
+        st.info("Por favor, carregue um arquivo CSV para iniciar.")
+    if not user_input:
+        st.info("Por favor, digite uma pergunta para começar a análise.")
