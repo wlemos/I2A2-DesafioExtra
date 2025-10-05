@@ -1,3 +1,4 @@
+import json
 from utils.supabase_client import supabase
 
 class MemoryAgent:
@@ -22,7 +23,7 @@ class MemoryAgent:
         conclusoes = [item["resposta"] for item in self.historico
                       if dataset_id is None or item["dataset_id"] == dataset_id]
         if conclusoes:
-            return "\n".join(conclusoes)
+            return "\n".join(json.dumps(c) if isinstance(c, dict) else str(c) for c in conclusoes)
         query = supabase.table("memorias").select("resposta")
         if dataset_id:
             query = query.eq("dataset_id", dataset_id)
