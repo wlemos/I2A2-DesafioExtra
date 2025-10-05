@@ -16,25 +16,21 @@ class OrchestratorAgent:
         return any(termo in pergunta_lower for termo in termos_grafico)
 
     def handle_query(self, user_input, uploaded_file):
-        contexto = self.memory.get_context(user_input)
+        contexto_historico = self.memory.get_conclusoes()
+        dataset_info = self.dataloader.load(uploaded_file) if uploaded_file else None
+        analise = self.analyzer.analyze(dataset_info, user_input, contexto=contexto_historico)
 
-        if uploaded_file:
-            dataset_info = self.dataloader.load(uploaded_file)
-        else:
-            dataset_info = contexto.get('dataset_info', None)
-
-        analise = self.analyzer.analyze(dataset_info, user_input)
-
-        # Só gera gráfico se detectar no texto da pergunta
         if self.precisa_grafico(user_input):
             graficos = self.visualizer.visualize(analise, dataset_info)
         else:
             graficos = []
 
-        self.memory.save_context(user_input, analise, graficos, dataset_info)
+        self.memory.save_context(user_input, analise, dataset_info=dataset_info)
+
         return {
-            "resumo": analise['resumo'],
-            "detalhes": analise['detalhes'],
+            "resumo": analise.get('resumo', ''),
+            "detalhes": analise.get('detalhes', ''),
             "graficos": graficos,
-            "contexto_passado": contexto.get('historico', None)
+            "conclusao": analise.get('conclusao', ''),
+            "contexto_passado": contexto_historico
         }
