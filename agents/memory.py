@@ -5,17 +5,18 @@ class MemoryAgent:
         self.historico = []
 
     def save_context(self, pergunta, resposta, dataset_info=None):
-        dataset_id = dataset_info.get("id") if dataset_info else None
-        # Salva localmente
+        dataset_id = dataset_info.get_id() if dataset_info else None
         self.historico.append({
             "pergunta": pergunta,
-            "resposta": resposta['resumo'],
+            "resposta": resposta,
+            "resumo": resposta,
             "dataset_id": dataset_id
         })
-        # Salva no Supabase
-        supabase.table('memorias').insert({
+        # Salva também no Supabase
+        supabase.table("memorias").insert({
             "pergunta": pergunta,
-            "resposta": resposta['resumo'],
+            "resposta": resposta,
+            "resumo": resposta,
             "dataset_id": dataset_id
         }).execute()
 
@@ -24,15 +25,13 @@ class MemoryAgent:
         conclusoes = [item["resposta"] for item in self.historico
                       if dataset_id is None or item["dataset_id"] == dataset_id]
         if conclusoes:
-            return "\n\n".join(conclusoes)
-
-        # Se não achar local, busca no Supabase
-        query = supabase.table('memorias').select('resposta')
+            return "\n".join(conclusoes)
+        # Busca no Supabase se não encontrar localmente
+        query = supabase.table("memorias").select("resposta")
         if dataset_id:
-            query = query.eq('dataset_id', dataset_id)
+            query = query.eq("dataset_id", dataset_id)
         dados = query.execute()
-
         if dados.data:
-            return "\n\n".join(item['resposta'] for item in dados.data)
+            return "\n".join(item["resposta"] for item in dados.data)
         else:
             return "Ainda não há análises anteriores registradas."
