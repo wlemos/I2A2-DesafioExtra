@@ -1,20 +1,7 @@
-import hashlib
 import pandas as pd
+import hashlib
 
 class DataLoaderAgent:
-    def gerar_dataset_id(self, df):
-        def convert_lists_to_strings(val):
-            if isinstance(val, list):
-                return str(val)
-            return val
-
-        # Aplica a conversão célula a célula para transformar listas em strings
-        df_for_hash = df.applymap(convert_lists_to_strings)
-
-        # Gera hash md5 baseado no dataframe modificado
-        data_bytes = pd.util.hash_pandas_object(df_for_hash, index=True).values.tobytes()
-        return hashlib.md5(data_bytes).hexdigest()
-
     def load(self, uploaded_file):
         df = pd.read_csv(uploaded_file)
         stats = {
@@ -28,3 +15,14 @@ class DataLoaderAgent:
         }
         dataset_id = self.gerar_dataset_id(df)
         return df, stats, dataset_id
+
+    def gerar_dataset_id(self, df):
+        def convert_lists_to_strings(value):
+            if isinstance(value, list):
+                return str(value)
+            return value
+
+        df_for_hash = df.applymap(convert_lists_to_strings)
+
+        data_bytes = pd.util.hash_pandas_object(df_for_hash, index=True).values.tobytes()
+        return hashlib.md5(data_bytes).hexdigest()
